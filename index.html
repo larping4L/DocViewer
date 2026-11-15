@@ -309,7 +309,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 26px;
     }
     .docx-host .docx-wrapper > section.docx {
       background: #ffffff !important;
@@ -1010,6 +1010,76 @@
         return rows;
       }
 
+      function paginateDocxSections(host) {
+        const wrapper = host.querySelector('.docx-wrapper');
+        if (!wrapper) return;
+        const sections = Array.from(wrapper.querySelectorAll(':scope > section.docx'));
+        sections.forEach(sec => {
+          const cs = getComputedStyle(sec);
+          const padTop = parseFloat(cs.paddingTop) || 0;
+          const padBot = parseFloat(cs.paddingBottom) || 0;
+          const minH = parseFloat(cs.minHeight) || 1122; // A4 @ 96dpi fallback
+          const maxContentH = Math.max(300, minH - padTop - padBot);
+
+          if (sec.scrollHeight <= minH + 12) return;
+
+          // Find main content container (docx-preview puts header, article/content, footer inside section)
+          const article = sec.querySelector(':scope > article') || sec;
+          const blocks = Array.from(article.children);
+          if (blocks.length <= 1) return;
+
+          // Measure block heights before moving
+          const heights = blocks.map(b => {
+            const bcs = getComputedStyle(b);
+            return b.getBoundingClientRect().height + (parseFloat(bcs.marginTop) || 0) + (parseFloat(bcs.marginBottom) || 0);
+          });
+
+          const pages = [];
+          let current = [];
+          let accH = 0;
+
+          for (let i = 0; i < blocks.length; i++) {
+            const h = heights[i];
+            if (current.length > 0 && accH + h > maxContentH) {
+              pages.push(current);
+              current = [blocks[i]];
+              accH = h;
+            } else {
+              current.push(blocks[i]);
+              accH += h;
+            }
+          }
+          if (current.length) pages.push(current);
+          if (pages.length <= 1) return;
+
+          // Keep first page in original section, clone section shell for subsequent pages
+          const headerEl = sec.querySelector(':scope > header');
+          const footerEl = sec.querySelector(':scope > footer');
+
+          pages.forEach((group, idx) => {
+            if (idx === 0) return;
+            const newSec = document.createElement('section');
+            newSec.className = sec.className;
+            newSec.style.cssText = sec.style.cssText;
+            if (headerEl) newSec.appendChild(headerEl.cloneNode(true));
+
+            if (article !== sec) {
+              const newArt = document.createElement('article');
+              newArt.className = article.className;
+              newArt.style.cssText = article.style.cssText;
+              group.forEach(node => newArt.appendChild(node));
+              newSec.appendChild(newArt);
+            } else {
+              group.forEach(node => newSec.appendChild(node));
+            }
+
+            if (footerEl) newSec.appendChild(footerEl.cloneNode(true));
+            wrapper.insertBefore(newSec, sec.nextSibling);
+            sec = newSec;
+          });
+        });
+      }
+
       function renderHtmlPage(htmlContent, noticeText = '') {
         el.viewer.innerHTML = '';
         const wrap = document.createElement('div');
@@ -1077,6 +1147,7 @@
               useBase64URL: true
             });
 
+            paginateDocxSections(host);
             state.html = host.innerHTML;
             state.text = host.innerText || '';
             el.copyTextBtn.disabled = !state.text.trim();
