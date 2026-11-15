@@ -317,7 +317,7 @@
       border: 1.5px solid #141414 !important;
       box-shadow: 4px 4px 0px rgba(20, 20, 20, 0.2) !important;
       margin-bottom: 0 !important;
-      max-width: 100%;
+      flex-shrink: 0;
     }
 
     /* Generic document / table / markdown / code page */
@@ -640,7 +640,8 @@
     (() => {
       const CDN = {
         jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js',
-        docxPreview: 'https://cdn.jsdelivr.net/npm/docx-preview@0.1.15/dist/docx-preview.min.js',
+        docxPreview: 'https://cdn.jsdelivr.net/npm/docx-preview@0.3.7/dist/docx-preview.min.js',
+        mammoth: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.13.0/mammoth.browser.min.js',
         pdfjs: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js',
         pdfWorker: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.worker.min.js',
         marked: 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
@@ -1010,6 +1011,79 @@
         return rows;
       }
 
+      async function normalizeDocxUnits(buf) {
+        try {
+          const zip = await window.JSZip.loadAsync(buf);
+          const docFile = zip.file('word/document.xml');
+          if (!docFile) return buf;
+          let xml = await docFile.async('string');
+          // Fix non-twip units in w:pgMar / w:pgSz (e.g. Microsoft Teams exports "1in")
+          if (/w:pgMar[^>]*?(?:in|cm|mm|pt)"/.test(xml)) {
+            const toTwips = (_, attr, val, unit) => {
+              const n = parseFloat(val);
+              const mult = unit === 'in' ? 1440 : unit === 'cm' ? 566.93 : unit === 'mm' ? 56.693 : 20;
+              return `${attr}="${Math.round(n * mult)}"`;
+            };
+            xml = xml.replace(/(w:(?:top|right|bottom|left|header|footer|gutter))="([0-9.]+)(in|cm|mm|pt)"/g, toTwips);
+            zip.file('word/document.xml', xml);
+            return await zip.generateAsync({ type: 'arraybuffer' });
+          }
+        } catch {}
+        return buf;
+      }
+
+      function extractTextFromRtf(rtf) {
+        return rtf
+          .replace(/\\par[d]?/g, '\n')
+          .replace(/\\tab/g, '\t')
+          .replace(/\\'([0-9a-fA-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+          .replace(/\{\\\*\\[^}]+\}/g, '')
+          .replace(/\\[a-zA-Z]+-?\d* ?/g, '')
+          .replace(/[{}]/g, '')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+      }
+
+      function splitOversizedParagraph(pEl, maxH) {
+        const text = pEl.textContent || '';
+        if (text.length < 200) return [pEl];
+        // Split only if paragraph has mostly text (no complex nested tables)
+        if (pEl.querySelector('table')) return [pEl];
+
+        const imgs = Array.from(pEl.querySelectorAll('img')).map(img => img.cloneNode(true));
+        const words = text.split(/(\s+)/);
+        const chunks = [];
+        const probe = pEl.cloneNode(false);
+        probe.style.visibility = 'hidden';
+        probe.style.position = 'absolute';
+        probe.style.width = pEl.getBoundingClientRect().width + 'px';
+        pEl.parentNode.insertBefore(probe, pEl);
+
+        let cur = '';
+        for (let i = 0; i < words.length; i++) {
+          const next = cur + words[i];
+          probe.textContent = next;
+          if (cur && probe.getBoundingClientRect().height > maxH) {
+            chunks.push(cur.trim());
+            cur = words[i].trimStart();
+          } else {
+            cur = next;
+          }
+        }
+        if (cur.trim()) chunks.push(cur.trim());
+        probe.remove();
+
+        if (chunks.length <= 1) return [pEl];
+        return chunks.map((chunk, idx) => {
+          const clone = pEl.cloneNode(false);
+          if (idx === 0 && imgs.length) {
+            imgs.forEach(im => clone.appendChild(im));
+          }
+          clone.appendChild(document.createTextNode(chunk));
+          return clone;
+        });
+      }
+
       function paginateDocxSections(host) {
         const wrapper = host.querySelector('.docx-wrapper');
         if (!wrapper) return;
@@ -1018,17 +1092,33 @@
           const cs = getComputedStyle(sec);
           const padTop = parseFloat(cs.paddingTop) || 0;
           const padBot = parseFloat(cs.paddingBottom) || 0;
-          const minH = parseFloat(cs.minHeight) || 1122; // A4 @ 96dpi fallback
+          const minH = parseFloat(cs.minHeight) || 1122;
           const maxContentH = Math.max(300, minH - padTop - padBot);
 
           if (sec.scrollHeight <= minH + 12) return;
 
-          // Find main content container (docx-preview puts header, article/content, footer inside section)
           const article = sec.querySelector(':scope > article') || sec;
-          const blocks = Array.from(article.children);
+          let blocks = Array.from(article.children);
+          if (blocks.length === 0) return;
+
+          // Split any single giant paragraph (e.g. 14,000-char transcript block)
+          const expanded = [];
+          blocks.forEach(b => {
+            const h = b.getBoundingClientRect().height;
+            if (b.tagName === 'P' && h > maxContentH * 0.9) {
+              const parts = splitOversizedParagraph(b, maxContentH * 0.85);
+              parts.forEach(p => {
+                if (p !== b) article.insertBefore(p, b);
+                expanded.push(p);
+              });
+              if (parts[0] !== b) b.remove();
+            } else {
+              expanded.push(b);
+            }
+          });
+          blocks = expanded;
           if (blocks.length <= 1) return;
 
-          // Measure block heights before moving
           const heights = blocks.map(b => {
             const bcs = getComputedStyle(b);
             return b.getBoundingClientRect().height + (parseFloat(bcs.marginTop) || 0) + (parseFloat(bcs.marginBottom) || 0);
@@ -1052,7 +1142,6 @@
           if (current.length) pages.push(current);
           if (pages.length <= 1) return;
 
-          // Keep first page in original section, clone section shell for subsequent pages
           const headerEl = sec.querySelector(':scope > header');
           const footerEl = sec.querySelector(':scope > footer');
 
@@ -1079,6 +1168,25 @@
           });
         });
       }
+
+      function fitDocxScale(host) {
+        const wrapper = host.querySelector('.docx-wrapper');
+        if (!wrapper) return;
+        const firstPage = wrapper.querySelector(':scope > section.docx');
+        if (!firstPage) return;
+        const avail = host.clientWidth - 32;
+        const pageW = firstPage.offsetWidth;
+        if (pageW > avail && avail > 200) {
+          wrapper.style.zoom = (avail / pageW).toFixed(3);
+        } else {
+          wrapper.style.zoom = '';
+        }
+      }
+
+      window.addEventListener('resize', () => {
+        const host = el.viewer.querySelector('.docx-host');
+        if (host) fitDocxScale(host);
+      });
 
       function renderHtmlPage(htmlContent, noticeText = '') {
         el.viewer.innerHTML = '';
@@ -1129,27 +1237,50 @@
             await loadScript(CDN.jszip);
             setProgress(65);
             await loadScript(CDN.docxPreview);
-            const buf = await file.arrayBuffer();
+            let buf = await file.arrayBuffer();
+            buf = await normalizeDocxUnits(buf);
 
             const host = document.createElement('div');
             host.className = 'docx-host';
             el.viewer.appendChild(host);
 
-            await window.docx.renderAsync(buf, host, null, {
-              className: 'docx',
-              inWrapper: true,
-              ignoreWidth: false,
-              ignoreHeight: false,
-              ignoreFonts: false,
-              breakPages: true,
-              ignoreLastRenderedPageBreak: false,
-              experimental: true,
-              useBase64URL: true
-            });
+            try {
+              await window.docx.renderAsync(buf, host, null, {
+                className: 'docx',
+                inWrapper: true,
+                ignoreWidth: false,
+                ignoreHeight: false,
+                ignoreFonts: false,
+                breakPages: true,
+                ignoreLastRenderedPageBreak: false,
+                experimental: true,
+                useBase64URL: true
+              });
 
-            paginateDocxSections(host);
-            state.html = host.innerHTML;
-            state.text = host.innerText || '';
+              paginateDocxSections(host);
+              fitDocxScale(host);
+              state.html = host.innerHTML;
+              state.text = host.innerText || '';
+            } catch (docxErr) {
+              // Universal fallback to Mammoth if docx-preview hits malformed XML
+              await loadScript(CDN.mammoth);
+              const res = await window.mammoth.convertToHtml({ arrayBuffer: buf });
+              const rawRes = await window.mammoth.extractRawText({ arrayBuffer: buf });
+              state.html = res.value || '';
+              state.text = rawRes.value || '';
+              renderHtmlPage(state.html);
+            }
+            el.copyTextBtn.disabled = !state.text.trim();
+          }
+          else if (ext === 'rtf') {
+            state.kind = 'doc';
+            const raw = await file.text();
+            state.text = extractTextFromRtf(raw);
+            state.html = state.text
+              .split(/\n{2,}/)
+              .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
+              .join('');
+            renderHtmlPage(state.html);
             el.copyTextBtn.disabled = !state.text.trim();
           }
           else if (ext === 'doc') {
