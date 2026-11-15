@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DocViewer — Быстрый просмотр и конвертация документов</title>
+  <title>DocViewer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #fafafa;
+      --bg: #ececea;
       --surface: #ffffff;
-      --surface-2: #f3f4f6;
-      --border: #e5e7eb;
-      --text: #111827;
-      --text-muted: #6b7280;
-      --accent: #2563eb;
-      --accent-hover: #1d4ed8;
-      --accent-soft: rgba(37, 99, 235, 0.08);
-      --danger: #dc2626;
-      --ok: #16a34a;
-      --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
-      --radius: 10px;
+      --surface-2: #e4e4e0;
+      --border: #141414;
+      --text: #141414;
+      --text-muted: #595955;
+      --inv-bg: #141414;
+      --inv-text: #ffffff;
+      --danger: #141414;
+      --shadow-hard: 4px 4px 0px #141414;
+      --shadow-hard-sm: 2px 2px 0px #141414;
+      --ui-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --mono-font: 'JetBrains Mono', monospace;
     }
     html.dark {
-      --bg: #0b0d11;
-      --surface: #13161c;
-      --surface-2: #1c2029;
-      --border: #262b36;
-      --text: #f3f4f6;
-      --text-muted: #9ca3af;
-      --accent: #3b82f6;
-      --accent-hover: #60a5fa;
-      --accent-soft: rgba(59, 130, 246, 0.14);
-      --shadow: 0 1px 3px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.28);
+      --bg: #111111;
+      --surface: #1a1a1a;
+      --surface-2: #262626;
+      --border: #e8e8e8;
+      --text: #f0f0f0;
+      --text-muted: #9e9e9e;
+      --inv-bg: #f0f0f0;
+      --inv-text: #111111;
+      --shadow-hard: 4px 4px 0px #e8e8e8;
+      --shadow-hard-sm: 2px 2px 0px #e8e8e8;
     }
 
     * { box-sizing: border-box; }
@@ -41,7 +41,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: var(--ui-font);
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -54,68 +54,74 @@
       overflow: hidden;
     }
 
-    /* Top Bar */
+    /* Top Bar — strictly aligned single-row grid/flex */
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      padding: 10px 16px;
+      gap: 12px;
+      min-height: 54px;
+      padding: 9px 16px;
       background: var(--surface);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
       flex-shrink: 0;
       flex-wrap: wrap;
     }
     .brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-weight: 600;
+      height: 34px;
+      font-weight: 700;
       font-size: 14px;
       letter-spacing: -0.01em;
       white-space: nowrap;
     }
-    .brand-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
+    .brand-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
     }
     .file-meta {
       display: flex;
       align-items: center;
       gap: 8px;
+      height: 34px;
       min-width: 0;
       flex: 1;
-      font-size: 13px;
+      font-size: 12.5px;
       color: var(--text-muted);
     }
     .file-name {
       color: var(--text);
-      font-weight: 500;
+      font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      max-width: 320px;
+      max-width: 280px;
     }
     .badge {
       display: inline-flex;
       align-items: center;
-      padding: 2px 7px;
-      border-radius: 6px;
+      justify-content: center;
+      height: 24px;
+      padding: 0 8px;
+      border-radius: 0;
+      font-family: var(--mono-font);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       text-transform: uppercase;
       background: var(--surface-2);
-      color: var(--text-muted);
-      border: 1px solid var(--border);
+      color: var(--text);
+      border: 1.5px solid var(--border);
       flex-shrink: 0;
     }
     .badge.accent {
-      background: var(--accent-soft);
-      color: var(--accent);
-      border-color: transparent;
+      background: var(--inv-bg);
+      color: var(--inv-text);
+      border-color: var(--border);
     }
 
     .actions {
@@ -126,39 +132,56 @@
     }
 
     button, select {
-      font-family: inherit;
+      height: 34px;
+      font-family: var(--ui-font);
       font-size: 13px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
+      font-weight: 500;
+      border-radius: 0;
+      border: 1.5px solid var(--border);
       background: var(--surface);
       color: var(--text);
-      padding: 6px 12px;
+      padding: 0 12px;
       cursor: pointer;
-      transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+      box-shadow: var(--shadow-hard-sm);
+      transition: transform 0.06s ease, box-shadow 0.06s ease, background 0.1s ease;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
-      line-height: 1.3;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    select {
+      padding-right: 10px;
     }
     button:hover:not(:disabled), select:hover:not(:disabled) {
       background: var(--surface-2);
     }
     button:active:not(:disabled) {
-      transform: scale(0.98);
+      transform: translate(2px, 2px);
+      box-shadow: 0 0 0 var(--border);
     }
     button:disabled, select:disabled {
-      opacity: 0.45;
+      opacity: 0.4;
       cursor: not-allowed;
+      box-shadow: none;
     }
     button.primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-      font-weight: 500;
+      background: var(--inv-bg);
+      color: var(--inv-text);
+      border-color: var(--border);
+      font-weight: 600;
     }
     button.primary:hover:not(:disabled) {
-      background: var(--accent-hover);
-      border-color: var(--accent-hover);
+      opacity: 0.88;
+      background: var(--inv-bg);
+    }
+
+    .px-ico {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: block;
     }
 
     .convert-group {
@@ -167,16 +190,17 @@
       gap: 6px;
     }
 
-    /* Main Workspace */
+    /* Main Workspace — clean flat slightly gray background */
     .workspace {
       position: relative;
       flex: 1;
       overflow: auto;
       display: flex;
       flex-direction: column;
+      background: var(--bg);
     }
 
-    /* Dropzone / Empty State */
+    /* Dropzone */
     .dropzone-wrap {
       flex: 1;
       display: flex;
@@ -186,49 +210,50 @@
     }
     .dropzone {
       width: 100%;
-      max-width: 540px;
+      max-width: 520px;
       background: var(--surface);
-      border: 1.5px dashed var(--border);
-      border-radius: 16px;
-      padding: 40px 28px;
+      border: 1.5px solid var(--border);
+      border-radius: 0;
+      padding: 36px 32px;
       text-align: center;
-      box-shadow: var(--shadow);
-      transition: border-color 0.15s ease, background 0.15s ease;
+      box-shadow: var(--shadow-hard);
+      transition: transform 0.1s ease, background 0.1s ease;
       cursor: pointer;
     }
     .dropzone.dragover {
-      border-color: var(--accent);
-      background: var(--accent-soft);
+      background: var(--surface-2);
+      transform: translate(-2px, -2px);
     }
     .drop-icon {
       width: 44px;
       height: 44px;
-      margin: 0 auto 14px;
-      border-radius: 12px;
-      background: var(--accent-soft);
-      color: var(--accent);
+      margin: 0 auto 16px;
+      border: 1.5px solid var(--border);
+      background: var(--inv-bg);
+      color: var(--inv-text);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--shadow-hard-sm);
     }
     .dropzone h1 {
       margin: 0 0 8px;
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 600;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
     }
     .dropzone p {
       margin: 0 0 18px;
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .format-pills {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 6px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .drop-actions {
       display: flex;
@@ -237,17 +262,20 @@
       flex-wrap: wrap;
     }
     .hint-footer {
-      margin-top: 18px;
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid var(--surface-2);
       font-size: 12px;
       color: var(--text-muted);
     }
     kbd {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--mono-font);
       font-size: 11px;
       padding: 2px 5px;
-      border-radius: 4px;
+      border-radius: 0;
       background: var(--surface-2);
       border: 1px solid var(--border);
+      color: var(--text);
     }
 
     /* Viewer Container */
@@ -266,9 +294,33 @@
       height: 100%;
       border: none;
       flex: 1;
-      background: #525659;
+      background: #404040;
     }
 
+    /* Original-fidelity DOCX wrapper */
+    .docx-host {
+      flex: 1;
+      overflow: auto;
+      padding: 24px 16px 48px;
+    }
+    .docx-host .docx-wrapper {
+      background: transparent !important;
+      padding: 0 !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .docx-host .docx-wrapper > section.docx {
+      background: #ffffff !important;
+      color: #000000 !important;
+      border: 1.5px solid #141414 !important;
+      box-shadow: 4px 4px 0px rgba(20, 20, 20, 0.2) !important;
+      margin-bottom: 0 !important;
+      max-width: 100%;
+    }
+
+    /* Generic document / table / markdown / code page */
     .doc-page-wrap {
       flex: 1;
       overflow: auto;
@@ -277,11 +329,13 @@
     .doc-page {
       max-width: 820px;
       margin: 0 auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background: #ffffff;
+      color: #141414;
+      border: 1.5px solid var(--border);
+      border-radius: 0;
+      box-shadow: var(--shadow-hard);
       padding: 36px 42px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.65;
       font-size: 15px;
       overflow-wrap: break-word;
@@ -293,7 +347,7 @@
     }
     .doc-page h1:first-child, .doc-page h2:first-child { margin-top: 0; }
     .doc-page p { margin: 0 0 0.9em; }
-    .doc-page img { max-width: 100%; height: auto; border-radius: 6px; }
+    .doc-page img { max-width: 100%; height: auto; }
     .doc-page table {
       width: 100%;
       border-collapse: collapse;
@@ -303,30 +357,30 @@
       overflow-x: auto;
     }
     .doc-page th, .doc-page td {
-      border: 1px solid var(--border);
+      border: 1px solid #141414;
       padding: 7px 10px;
       text-align: left;
     }
     .doc-page th {
-      background: var(--surface-2);
+      background: #ececea;
       font-weight: 600;
     }
     .doc-page pre {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: #f4f4f2;
+      border: 1.5px solid #141414;
+      border-radius: 0;
       padding: 14px;
       overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--mono-font);
       font-size: 13px;
       line-height: 1.5;
+      color: #141414;
     }
     .doc-page code {
-      font-family: 'JetBrains Mono', monospace;
+      font-family: var(--mono-font);
       font-size: 0.9em;
-      background: var(--surface-2);
+      background: #ececea;
       padding: 1px 5px;
-      border-radius: 4px;
     }
     .doc-page pre code { background: none; padding: 0; }
 
@@ -334,15 +388,12 @@
       max-width: 820px;
       margin: 0 auto 14px;
       padding: 10px 14px;
-      border-radius: 8px;
-      background: var(--accent-soft);
-      border: 1px solid var(--border);
-      font-size: 13px;
+      border-radius: 0;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-hard-sm);
+      font-size: 12.5px;
       color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
     }
 
     .sheet-tabs {
@@ -353,9 +404,9 @@
       flex-wrap: wrap;
     }
     .sheet-tab.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
+      background: var(--inv-bg);
+      color: var(--inv-text);
+      border-color: var(--border);
     }
 
     .img-view {
@@ -369,45 +420,44 @@
     .img-view img {
       max-width: 100%;
       max-height: 100%;
-      border-radius: 8px;
-      box-shadow: var(--shadow);
+      border: 1.5px solid var(--border);
+      box-shadow: var(--shadow-hard);
       object-fit: contain;
+      background: #fff;
     }
 
-    /* Drag overlay when file is already open */
     .drag-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(37, 99, 235, 0.12);
-      backdrop-filter: blur(2px);
-      border: 3px dashed var(--accent);
+      background: rgba(20, 20, 20, 0.78);
+      border: 4px dashed #ffffff;
       z-index: 50;
       display: none;
       align-items: center;
       justify-content: center;
       font-size: 18px;
       font-weight: 600;
-      color: var(--accent);
+      color: #ffffff;
       pointer-events: none;
     }
     .drag-overlay.visible { display: flex; }
 
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 18px;
       right: 18px;
-      background: var(--text);
-      color: var(--bg);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+      background: var(--inv-bg);
+      color: var(--inv-text);
+      border: 1.5px solid var(--border);
+      padding: 9px 14px;
+      border-radius: 0;
+      font-size: 12.5px;
       font-weight: 500;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-hard-sm);
       z-index: 60;
       opacity: 0;
       transform: translateY(8px);
-      transition: opacity 0.18s ease, transform 0.18s ease;
+      transition: opacity 0.15s ease, transform 0.15s ease;
       pointer-events: none;
       max-width: 340px;
     }
@@ -416,10 +466,9 @@
       transform: translateY(0);
     }
 
-    /* Loading indicator */
     .loader-bar {
-      height: 2px;
-      background: var(--accent);
+      height: 3px;
+      background: var(--text);
       width: 0%;
       transition: width 0.2s ease;
       position: fixed;
@@ -428,79 +477,144 @@
       z-index: 70;
     }
 
-    /* Responsive tweaks */
     @media (max-width: 640px) {
       .doc-page { padding: 20px 18px; }
-      .file-name { max-width: 160px; }
+      .file-name { max-width: 130px; }
       .topbar { padding: 8px 12px; }
     }
 
-    /* Print / PDF export styling */
+    /* Clean zero-watermark print / PDF export */
+    @page {
+      margin: 0;
+    }
     @media print {
-      .topbar, .notice-banner, .dropzone-wrap, .toast, .drag-overlay, .sheet-tabs {
+      .topbar, .notice-banner, .dropzone-wrap, .toast, .drag-overlay, .sheet-tabs, .loader-bar {
         display: none !important;
       }
-      html, body, .app, .workspace, .viewer, .doc-page-wrap {
+      html, body, .app, .workspace, .viewer, .doc-page-wrap, .docx-host {
         height: auto !important;
         overflow: visible !important;
-        background: #fff !important;
-        color: #000 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
         padding: 0 !important;
+        margin: 0 !important;
+      }
+      .docx-host .docx-wrapper {
+        gap: 0 !important;
+      }
+      .docx-host .docx-wrapper > section.docx {
+        border: none !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        page-break-after: always;
       }
       .doc-page {
         border: none !important;
         box-shadow: none !important;
         max-width: 100% !important;
-        padding: 0 !important;
+        padding: 14mm !important;
       }
     }
   </style>
 </head>
 <body>
   <div class="loader-bar" id="loaderBar"></div>
-  <div class="drag-overlay" id="dragOverlay">Отпустите файл для мгновенного открытия</div>
+  <div class="drag-overlay" id="dragOverlay"></div>
   <div class="toast" id="toast"></div>
 
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-dot"></span>
+        <span class="brand-icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges">
+            <rect x="2" y="1" width="8" height="2"/>
+            <rect x="10" y="3" width="2" height="2"/>
+            <rect x="12" y="5" width="2" height="10"/>
+            <rect x="2" y="13" width="10" height="2"/>
+            <rect x="2" y="3" width="2" height="10"/>
+            <rect x="5" y="6" width="5" height="2"/>
+            <rect x="5" y="9" width="5" height="2"/>
+          </svg>
+        </span>
         <span>DocViewer</span>
       </div>
 
-      <div class="file-meta" id="fileMeta">
-        <span>Локально • Без лимитов</span>
-      </div>
+      <div class="file-meta" id="fileMeta"></div>
 
       <div class="actions">
         <input type="file" id="fileInput" hidden />
-        <button type="button" id="openBtn" class="primary">Открыть файл</button>
+        <button type="button" id="openBtn" class="primary">
+          <svg class="px-ico" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="1" y="3" width="5" height="2"/>
+            <rect x="1" y="5" width="14" height="2"/>
+            <rect x="1" y="7" width="2" height="6"/>
+            <rect x="13" y="7" width="2" height="6"/>
+            <rect x="3" y="11" width="10" height="2"/>
+          </svg>
+          <span id="openBtnLabel"></span>
+        </button>
 
         <div class="convert-group">
-          <select id="convertSelect" disabled aria-label="Формат конвертации">
-            <option value="">Конвертировать в...</option>
-          </select>
-          <button type="button" id="convertBtn" disabled>Скачать</button>
+          <select id="convertSelect" disabled></select>
+          <button type="button" id="convertBtn" disabled>
+            <svg class="px-ico" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+              <rect x="7" y="2" width="2" height="7"/>
+              <rect x="5" y="7" width="2" height="2"/>
+              <rect x="9" y="7" width="2" height="2"/>
+              <rect x="7" y="9" width="2" height="2"/>
+              <rect x="2" y="12" width="12" height="2"/>
+            </svg>
+            <span id="convertBtnLabel"></span>
+          </button>
         </div>
 
-        <button type="button" id="copyTextBtn" disabled title="Копировать текст">Копировать</button>
-        <button type="button" id="themeBtn" title="Переключить тему">Тема</button>
+        <button type="button" id="copyTextBtn" disabled>
+          <svg class="px-ico" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="2" width="8" height="2"/>
+            <rect x="2" y="4" width="2" height="8"/>
+            <rect x="6" y="5" width="8" height="2"/>
+            <rect x="6" y="7" width="2" height="7"/>
+            <rect x="12" y="7" width="2" height="7"/>
+            <rect x="8" y="12" width="4" height="2"/>
+          </svg>
+          <span id="copyBtnLabel"></span>
+        </button>
+
+        <button type="button" id="langBtn"></button>
+
+        <button type="button" id="themeBtn">
+          <svg class="px-ico" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="5" y="2" width="6" height="2"/>
+            <rect x="3" y="4" width="2" height="2"/>
+            <rect x="11" y="4" width="2" height="2"/>
+            <rect x="2" y="6" width="2" height="4"/>
+            <rect x="12" y="6" width="2" height="4"/>
+            <rect x="3" y="10" width="2" height="2"/>
+            <rect x="11" y="10" width="2" height="2"/>
+            <rect x="5" y="12" width="6" height="2"/>
+            <rect x="6" y="6" width="4" height="4"/>
+          </svg>
+          <span id="themeBtnLabel"></span>
+        </button>
       </div>
     </header>
 
     <main class="workspace" id="workspace">
       <div class="dropzone-wrap" id="dropzoneWrap">
-        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Выбрать или перетащить файл">
-          <div class="drop-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="12" y1="18" x2="12" y2="12"></line>
-              <line x1="9" y1="15" x2="15" y2="15"></line>
+        <div class="dropzone" id="dropzone" tabindex="0" role="button">
+          <div class="drop-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges">
+              <rect x="3" y="1" width="7" height="2"/>
+              <rect x="10" y="3" width="2" height="2"/>
+              <rect x="12" y="5" width="2" height="10"/>
+              <rect x="2" y="13" width="10" height="2"/>
+              <rect x="2" y="3" width="2" height="10"/>
+              <rect x="7" y="6" width="2" height="5"/>
+              <rect x="5" y="8" width="6" height="2"/>
             </svg>
           </div>
-          <h1>Перетащите документ сюда</h1>
-          <p>Открывается мгновенно прямо в браузере, без загрузки на сервер и без ограничений по размеру.</p>
+          <h1 id="dropTitle"></h1>
+          <p id="dropDesc"></p>
           <div class="format-pills">
             <span class="badge accent">PDF</span>
             <span class="badge accent">DOCX</span>
@@ -511,12 +625,10 @@
             <span class="badge">PNG / JPG / WEBP</span>
           </div>
           <div class="drop-actions">
-            <button type="button" id="pickBtn" class="primary">Выбрать файл</button>
-            <button type="button" id="demoBtn">Открыть пример</button>
+            <button type="button" id="pickBtn" class="primary"></button>
+            <button type="button" id="demoBtn"></button>
           </div>
-          <div class="hint-footer">
-            Нажмите <kbd>Ctrl</kbd>+<kbd>D</kbd> (или <kbd>Cmd</kbd>+<kbd>D</kbd>), чтобы добавить в закладки • <kbd>Ctrl</kbd>+<kbd>O</kbd> — открыть файл
-          </div>
+          <div class="hint-footer" id="hintFooter"></div>
         </div>
       </div>
 
@@ -527,32 +639,127 @@
   <script>
     (() => {
       const CDN = {
-        mammoth: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.13.0/mammoth.browser.min.js',
+        jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js',
+        docxPreview: 'https://cdn.jsdelivr.net/npm/docx-preview@0.1.15/dist/docx-preview.min.js',
         pdfjs: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js',
         pdfWorker: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.worker.min.js',
         marked: 'https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js',
         xlsx: 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
       };
 
+      const I18N = {
+        uk: {
+          metaIdle: 'Локально • Без лімітів',
+          openFile: 'Відкрити',
+          pickFile: 'Вибрати файл',
+          demoBtn: 'Приклад',
+          convertPlaceholder: 'Конвертувати в...',
+          download: 'Зберегти',
+          copy: 'Копіювати',
+          theme: 'Тема',
+          dragOverlay: 'Відпустіть файл для миттєвого відкриття',
+          dropTitle: 'Перетягніть документ сюди',
+          dropDesc: 'Відкривається миттєво у браузері зі збереженням оригінальних шрифтів і розмітки, без завантаження на сервер і без обмежень.',
+          hintFooter: '<kbd>Ctrl</kbd>+<kbd>D</kbd> — в закладки • <kbd>Ctrl</kbd>+<kbd>O</kbd> — відкрити файл',
+          docNotice: 'Формат .doc (Word 97–2003) — застарілий бінарний формат: показано витягнутий текст без складного оформлення.',
+          docEmptyRead: 'Не вдалося витягнути читабельний текст із цього бінарного .doc файлу.',
+          openError: 'Помилка відкриття файлу',
+          openErrorToast: 'Не вдалося відкрити файл',
+          extractingPdf: 'Витягування тексту з PDF...',
+          renderingPng: 'Рендеринг сторінок PDF у PNG...',
+          savedPrefix: 'Збережено: ',
+          savedPngAll: 'Сторінки збережено у PNG',
+          savedPngLimit: 'Збережено перші 15 сторінок у PNG',
+          printHint: 'Виберіть «Зберегти як PDF» та вимкніть колонтитули',
+          copied: 'Текст скопійовано',
+          copyFailed: 'Не вдалося витягнути текст',
+          convertError: 'Помилка конвертації: ',
+          pageLabel: 'Сторінка',
+          ms: 'мс',
+          bytes: ['Б', 'КБ', 'МБ'],
+          optPdfPrint: 'PDF (друк / зберегти)',
+          optPdfTxt: 'TXT (витягнути текст)',
+          optPdfPng: 'PNG (сторінки як зображення)',
+          optHtml: 'HTML (оригінальний вигляд)',
+          optTxt: 'TXT (чистий текст)',
+          optTxtCopy: 'TXT (копія)',
+          optMd: 'Markdown (.md)',
+          optCsv: 'CSV (поточний аркуш)',
+          optJson: 'JSON (поточний аркуш)',
+          demoFile: 'приклад-документа.md',
+          demoBody: `# Приклад документа\n\nЦей файл відкрито **повністю локально** у вашому браузері без жодних обмежень.\n\n## Основні можливості\n\n- **PDF** — відкривається нативним рушієм браузера з оригінальними шрифтами та макетом.\n- **DOCX** — точний рендеринг сторінок, шрифтів, таблиць і відступів як в оригіналі.\n- **Конвертація** — оберіть потрібний формат у верхньому меню та натисніть *Зберегти* (без водяних знаків).\n\n| Формат | Рушій | Конвертація |\n| --- | --- | --- |\n| PDF | Нативний браузер / PDF.js | TXT, PNG |\n| DOCX | docx-preview | PDF, HTML, TXT, MD |\n| XLSX / CSV | SheetJS | CSV, JSON, HTML, PDF |\n`
+        },
+        en: {
+          metaIdle: 'Local • No limits',
+          openFile: 'Open',
+          pickFile: 'Choose File',
+          demoBtn: 'Sample',
+          convertPlaceholder: 'Convert to...',
+          download: 'Save',
+          copy: 'Copy',
+          theme: 'Theme',
+          dragOverlay: 'Drop file to open instantly',
+          dropTitle: 'Drop your document here',
+          dropDesc: 'Opens instantly in your browser preserving original fonts and layout, with zero server uploads and no file size limits.',
+          hintFooter: '<kbd>Ctrl</kbd>+<kbd>D</kbd> to bookmark • <kbd>Ctrl</kbd>+<kbd>O</kbd> to open a file',
+          docNotice: 'Legacy .doc (Word 97–2003) binary format: showing extracted plain text without complex layout.',
+          docEmptyRead: 'Could not extract readable text from this binary .doc file.',
+          openError: 'Failed to open file',
+          openErrorToast: 'Could not open file',
+          extractingPdf: 'Extracting text from PDF...',
+          renderingPng: 'Rendering PDF pages to PNG...',
+          savedPrefix: 'Saved: ',
+          savedPngAll: 'Pages saved as PNG',
+          savedPngLimit: 'Saved first 15 pages as PNG',
+          printHint: 'Choose "Save as PDF" and disable headers/footers',
+          copied: 'Text copied',
+          copyFailed: 'Could not extract text',
+          convertError: 'Conversion error: ',
+          pageLabel: 'Page',
+          ms: 'ms',
+          bytes: ['B', 'KB', 'MB'],
+          optPdfPrint: 'PDF (print / save)',
+          optPdfTxt: 'TXT (extract text)',
+          optPdfPng: 'PNG (pages as images)',
+          optHtml: 'HTML (original layout)',
+          optTxt: 'TXT (plain text)',
+          optTxtCopy: 'TXT (copy)',
+          optMd: 'Markdown (.md)',
+          optCsv: 'CSV (current sheet)',
+          optJson: 'JSON (current sheet)',
+          demoFile: 'sample-document.md',
+          demoBody: `# Sample Document\n\nThis file is opened **100% locally** in your browser with zero limits.\n\n## Key Capabilities\n\n- **PDF** — rendered via the browser's native engine with original fonts and layout.\n- **DOCX** — high-fidelity rendering of pages, fonts, tables, and margins.\n- **Conversion** — pick any target format in the top bar and click *Save* (no watermarks).\n\n| Format | Engine | Export |\n| --- | --- | --- |\n| PDF | Native Browser / PDF.js | TXT, PNG |\n| DOCX | docx-preview | PDF, HTML, TXT, MD |\n| XLSX / CSV | SheetJS | CSV, JSON, HTML, PDF |\n`
+        }
+      };
+
       const el = {
         fileInput: document.getElementById('fileInput'),
         openBtn: document.getElementById('openBtn'),
+        openBtnLabel: document.getElementById('openBtnLabel'),
         pickBtn: document.getElementById('pickBtn'),
         demoBtn: document.getElementById('demoBtn'),
         dropzone: document.getElementById('dropzone'),
         dropzoneWrap: document.getElementById('dropzoneWrap'),
+        dropTitle: document.getElementById('dropTitle'),
+        dropDesc: document.getElementById('dropDesc'),
+        hintFooter: document.getElementById('hintFooter'),
         viewer: document.getElementById('viewer'),
         fileMeta: document.getElementById('fileMeta'),
         convertSelect: document.getElementById('convertSelect'),
         convertBtn: document.getElementById('convertBtn'),
+        convertBtnLabel: document.getElementById('convertBtnLabel'),
         copyTextBtn: document.getElementById('copyTextBtn'),
+        copyBtnLabel: document.getElementById('copyBtnLabel'),
+        langBtn: document.getElementById('langBtn'),
         themeBtn: document.getElementById('themeBtn'),
+        themeBtnLabel: document.getElementById('themeBtnLabel'),
         dragOverlay: document.getElementById('dragOverlay'),
         toast: document.getElementById('toast'),
         loaderBar: document.getElementById('loaderBar')
       };
 
       const state = {
+        lang: 'uk',
         file: null,
         ext: '',
         kind: '',
@@ -560,8 +767,19 @@
         text: '',
         blobUrl: null,
         workbook: null,
-        imageEl: null
+        currentSheet: '',
+        imageEl: null,
+        elapsedMs: 0
       };
+
+      try {
+        const savedLang = localStorage.getItem('docviewer_lang');
+        if (savedLang === 'uk' || savedLang === 'en') state.lang = savedLang;
+      } catch {}
+
+      function t(key) {
+        return I18N[state.lang][key] || I18N.uk[key] || key;
+      }
 
       const loadedScripts = new Map();
 
@@ -574,7 +792,7 @@
           s.onload = () => resolve();
           s.onerror = () => {
             loadedScripts.delete(url);
-            reject(new Error('Не удалось загрузить модуль: ' + url));
+            reject(new Error('Failed to load: ' + url));
           };
           document.head.appendChild(s);
         });
@@ -598,9 +816,10 @@
       }
 
       function formatBytes(bytes) {
-        if (bytes < 1024) return bytes + ' Б';
-        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' КБ';
-        return (bytes / (1024 * 1024)).toFixed(2) + ' МБ';
+        const units = t('bytes');
+        if (bytes < 1024) return bytes + ' ' + units[0];
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' ' + units[1];
+        return (bytes / (1024 * 1024)).toFixed(2) + ' ' + units[2];
       }
 
       function escapeHtml(str) {
@@ -621,6 +840,37 @@
         return idx >= 0 ? filename.slice(idx + 1).toLowerCase() : '';
       }
 
+      function applyLanguage() {
+        document.documentElement.lang = state.lang;
+        el.openBtnLabel.textContent = t('openFile');
+        el.pickBtn.textContent = t('pickFile');
+        el.demoBtn.textContent = t('demoBtn');
+        el.convertBtnLabel.textContent = t('download');
+        el.copyBtnLabel.textContent = t('copy');
+        el.themeBtnLabel.textContent = t('theme');
+        el.langBtn.textContent = state.lang === 'uk' ? 'UA' : 'EN';
+        el.dragOverlay.textContent = t('dragOverlay');
+        el.dropTitle.textContent = t('dropTitle');
+        el.dropDesc.textContent = t('dropDesc');
+        el.hintFooter.innerHTML = t('hintFooter');
+        el.dropzone.setAttribute('aria-label', t('pickFile'));
+        el.convertSelect.setAttribute('aria-label', t('convertPlaceholder'));
+
+        if (!state.file) {
+          el.fileMeta.textContent = t('metaIdle');
+        } else {
+          updateMetaBar(state.file, state.ext, state.elapsedMs);
+        }
+        if (state.kind) {
+          const prev = el.convertSelect.value;
+          populateConvertOptions(state.kind);
+          if (prev) el.convertSelect.value = prev;
+          el.convertBtn.disabled = !el.convertSelect.value;
+        } else {
+          el.convertSelect.innerHTML = `<option value="">${t('convertPlaceholder')}</option>`;
+        }
+      }
+
       function cleanupPrevious() {
         if (state.blobUrl) {
           URL.revokeObjectURL(state.blobUrl);
@@ -629,6 +879,7 @@
         state.html = '';
         state.text = '';
         state.workbook = null;
+        state.currentSheet = '';
         state.imageEl = null;
       }
 
@@ -644,7 +895,7 @@
         extBadge.textContent = ext || 'FILE';
 
         const infoSpan = document.createElement('span');
-        infoSpan.textContent = `${formatBytes(file.size)} • ${elapsedMs} мс`;
+        infoSpan.textContent = `${formatBytes(file.size)} • ${elapsedMs} ${t('ms')}`;
 
         el.fileMeta.append(nameSpan, extBadge, infoSpan);
       }
@@ -652,46 +903,46 @@
       function populateConvertOptions(kind) {
         const optionsMap = {
           pdf: [
-            { value: 'txt', label: 'TXT (извлечь текст)' },
-            { value: 'png', label: 'PNG (страницы как картинки)' }
+            { value: 'txt', label: t('optPdfTxt') },
+            { value: 'png', label: t('optPdfPng') }
           ],
           docx: [
-            { value: 'pdf', label: 'PDF (печать / сохранить)' },
-            { value: 'html', label: 'HTML (веб-страница)' },
-            { value: 'txt', label: 'TXT (чистый текст)' },
-            { value: 'md', label: 'Markdown (.md)' }
+            { value: 'pdf', label: t('optPdfPrint') },
+            { value: 'html', label: t('optHtml') },
+            { value: 'txt', label: t('optTxt') },
+            { value: 'md', label: t('optMd') }
           ],
           doc: [
-            { value: 'pdf', label: 'PDF (печать / сохранить)' },
-            { value: 'txt', label: 'TXT (извлечённый текст)' },
-            { value: 'html', label: 'HTML (веб-страница)' }
+            { value: 'pdf', label: t('optPdfPrint') },
+            { value: 'txt', label: t('optTxt') },
+            { value: 'html', label: t('optHtml') }
           ],
           markdown: [
-            { value: 'pdf', label: 'PDF (печать / сохранить)' },
-            { value: 'html', label: 'HTML (веб-страница)' },
-            { value: 'txt', label: 'TXT (чистый текст)' }
+            { value: 'pdf', label: t('optPdfPrint') },
+            { value: 'html', label: t('optHtml') },
+            { value: 'txt', label: t('optTxt') }
           ],
           text: [
-            { value: 'pdf', label: 'PDF (печать / сохранить)' },
-            { value: 'html', label: 'HTML (веб-страница)' },
-            { value: 'txt', label: 'TXT (копия)' }
+            { value: 'pdf', label: t('optPdfPrint') },
+            { value: 'html', label: t('optHtml') },
+            { value: 'txt', label: t('optTxtCopy') }
           ],
           sheet: [
-            { value: 'csv', label: 'CSV (текущий лист)' },
-            { value: 'json', label: 'JSON (текущий лист)' },
-            { value: 'html', label: 'HTML (таблица)' },
-            { value: 'pdf', label: 'PDF (печать / сохранить)' }
+            { value: 'csv', label: t('optCsv') },
+            { value: 'json', label: t('optJson') },
+            { value: 'html', label: t('optHtml') },
+            { value: 'pdf', label: t('optPdfPrint') }
           ],
           image: [
             { value: 'png', label: 'PNG' },
             { value: 'jpeg', label: 'JPG' },
             { value: 'webp', label: 'WEBP' },
-            { value: 'pdf', label: 'PDF (печать / сохранить)' }
+            { value: 'pdf', label: t('optPdfPrint') }
           ]
         };
 
         const list = optionsMap[kind] || [];
-        el.convertSelect.innerHTML = '<option value="">Конвертировать в...</option>';
+        el.convertSelect.innerHTML = `<option value="">${t('convertPlaceholder')}</option>`;
         list.forEach(opt => {
           const o = document.createElement('option');
           o.value = opt.value;
@@ -702,46 +953,42 @@
         el.convertBtn.disabled = true;
       }
 
-      // Fast binary .doc text extractor (supports UTF-16LE and Windows-1251/Latin runs)
       function extractTextFromLegacyDoc(buffer) {
         const bytes = new Uint8Array(buffer);
         const chunks = [];
 
-        // 1) Try scanning UTF-16LE sequences (common in Word 97-2003 Cyrillic/Unicode text)
         let current = [];
         for (let i = 0; i + 1 < bytes.length; i += 2) {
           const code = bytes[i] | (bytes[i + 1] << 8);
           const isPrintable =
             code === 10 || code === 13 || code === 9 ||
             (code >= 32 && code <= 126) ||
-            (code >= 0x0400 && code <= 0x04FF); // Cyrillic
+            (code >= 0x0400 && code <= 0x04FF);
           if (isPrintable) {
             current.push(code === 13 ? '\n' : String.fromCharCode(code));
           } else {
             if (current.length >= 12) {
               const str = current.join('').trim();
-              if (/[a-zA-Zа-яА-ЯёЁіІїЇєЄ0-9]{3,}/.test(str)) chunks.push(str);
+              if (/[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ0-9]{3,}/.test(str)) chunks.push(str);
             }
             current = [];
           }
         }
         if (current.length >= 12) {
           const str = current.join('').trim();
-          if (/[a-zA-Zа-яА-ЯёЁіІїЇєЄ0-9]{3,}/.test(str)) chunks.push(str);
+          if (/[a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ0-9]{3,}/.test(str)) chunks.push(str);
         }
 
-        // 2) Fallback: Windows-1251 8-bit text runs if UTF-16LE yielded little
         let result = chunks.join('\n\n').replace(/\n{3,}/g, '\n\n').trim();
         if (result.length < 40) {
           const dec = new TextDecoder('windows-1251', { fatal: false });
           const raw = dec.decode(bytes);
-          const matches = raw.match(/[A-Za-zА-Яа-яЁёІіЇїЄє0-9 ,.;:!?()"'«»\-–—\n]{16,}/g) || [];
-          result = matches.map(s => s.trim()).filter(s => /[A-Za-zА-Яа-яЁёІіЇїЄє]{4,}/.test(s)).join('\n\n');
+          const matches = raw.match(/[A-Za-zА-Яа-яЁёІіЇїЄєҐґ0-9 ,.;:!?()"'«»\-–—\n]{16,}/g) || [];
+          result = matches.map(s => s.trim()).filter(s => /[A-Za-zА-Яа-яЁёІіЇїЄєҐґ]{4,}/.test(s)).join('\n\n');
         }
-        return result || 'Не удалось извлечь читаемый текст из этого бинарного .doc файла.';
+        return result || t('docEmptyRead');
       }
 
-      // Simple CSV parser
       function parseCsv(text) {
         const rows = [];
         let row = [], cell = '', inQuotes = false;
@@ -796,7 +1043,6 @@
         el.viewer.innerHTML = '';
 
         try {
-          // 1. PDF — instant native browser engine
           if (ext === 'pdf' || file.type === 'application/pdf') {
             state.kind = 'pdf';
             state.blobUrl = URL.createObjectURL(file);
@@ -807,20 +1053,34 @@
             el.viewer.appendChild(iframe);
             el.copyTextBtn.disabled = false;
           }
-          // 2. DOCX — fast client-side Mammoth.js
           else if (ext === 'docx') {
             state.kind = 'docx';
-            setProgress(55);
-            await loadScript(CDN.mammoth);
+            setProgress(45);
+            await loadScript(CDN.jszip);
+            setProgress(65);
+            await loadScript(CDN.docxPreview);
             const buf = await file.arrayBuffer();
-            const res = await window.mammoth.convertToHtml({ arrayBuffer: buf });
-            const rawRes = await window.mammoth.extractRawText({ arrayBuffer: buf });
-            state.html = res.value || '<p><em>Документ пуст.</em></p>';
-            state.text = rawRes.value || '';
-            renderHtmlPage(state.html);
-            el.copyTextBtn.disabled = !state.text;
+
+            const host = document.createElement('div');
+            host.className = 'docx-host';
+            el.viewer.appendChild(host);
+
+            await window.docx.renderAsync(buf, host, null, {
+              className: 'docx',
+              inWrapper: true,
+              ignoreWidth: false,
+              ignoreHeight: false,
+              ignoreFonts: false,
+              breakPages: true,
+              ignoreLastRenderedPageBreak: false,
+              experimental: true,
+              useBase64URL: true
+            });
+
+            state.html = host.innerHTML;
+            state.text = host.innerText || '';
+            el.copyTextBtn.disabled = !state.text.trim();
           }
-          // 3. DOC (legacy binary) — fast binary text scan
           else if (ext === 'doc') {
             state.kind = 'doc';
             const buf = await file.arrayBuffer();
@@ -829,13 +1089,9 @@
               .split(/\n{2,}/)
               .map(p => `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`)
               .join('');
-            renderHtmlPage(
-              state.html,
-              'Формат .doc (Word 97–2003) — устаревший бинарный формат: показан извлечённый текст без сложного оформления.'
-            );
+            renderHtmlPage(state.html, t('docNotice'));
             el.copyTextBtn.disabled = false;
           }
-          // 4. Spreadsheets (XLSX, XLS, ODS, CSV)
           else if (['xlsx', 'xls', 'ods'].includes(ext)) {
             state.kind = 'sheet';
             setProgress(55);
@@ -859,7 +1115,6 @@
             renderHtmlPage(tableHtml);
             el.copyTextBtn.disabled = false;
           }
-          // 5. Markdown
           else if (ext === 'md' || ext === 'markdown') {
             state.kind = 'markdown';
             const txt = await file.text();
@@ -873,7 +1128,6 @@
             renderHtmlPage(state.html);
             el.copyTextBtn.disabled = false;
           }
-          // 6. Images
           else if (['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp'].includes(ext) || file.type.startsWith('image/')) {
             state.kind = 'image';
             state.blobUrl = URL.createObjectURL(file);
@@ -887,7 +1141,6 @@
             el.viewer.appendChild(wrap);
             el.copyTextBtn.disabled = true;
           }
-          // 7. HTML
           else if (ext === 'html' || ext === 'htm') {
             state.kind = 'text';
             const txt = await file.text();
@@ -902,7 +1155,6 @@
             el.viewer.appendChild(iframe);
             el.copyTextBtn.disabled = false;
           }
-          // 8. Any text / code / JSON / XML / LOG fallback
           else {
             state.kind = 'text';
             const txt = await file.text();
@@ -917,13 +1169,13 @@
           }
 
           populateConvertOptions(state.kind);
-          const elapsed = Math.max(1, Math.round(performance.now() - t0));
-          updateMetaBar(file, ext, elapsed);
+          state.elapsedMs = Math.max(1, Math.round(performance.now() - t0));
+          updateMetaBar(file, ext, state.elapsedMs);
           setProgress(100);
         } catch (err) {
           setProgress(100);
-          renderHtmlPage(`<p style="color:var(--danger)"><strong>Ошибка открытия файла:</strong> ${escapeHtml(err.message || String(err))}</p>`);
-          showToast('Не удалось открыть файл');
+          renderHtmlPage(`<p style="color:var(--danger)"><strong>${t('openError')}:</strong> ${escapeHtml(err.message || String(err))}</p>`);
+          showToast(t('openErrorToast'));
         }
       }
 
@@ -973,6 +1225,7 @@
 
       function htmlToSimpleMarkdown(htmlStr) {
         const doc = new DOMParser().parseFromString(htmlStr, 'text/html');
+        doc.querySelectorAll('style, script').forEach(n => n.remove());
         function walk(node) {
           if (node.nodeType === 3) return node.textContent;
           if (node.nodeType !== 1) return '';
@@ -1006,10 +1259,20 @@
           setProgress(35 + Math.round((i / pdf.numPages) * 60));
           const page = await pdf.getPage(i);
           const content = await page.getTextContent();
-          pages.push(`--- Страница ${i} ---\n` + content.items.map(it => it.str).join(' '));
+          pages.push(`--- ${t('pageLabel')} ${i} ---\n` + content.items.map(it => it.str).join(' '));
         }
         setProgress(100);
         return pages.join('\n\n');
+      }
+
+      function cleanPrint(fileTitle) {
+        const prevTitle = document.title;
+        document.title = fileTitle || 'Document';
+        showToast(t('printHint'));
+        setTimeout(() => {
+          window.print();
+          document.title = prevTitle;
+        }, 120);
       }
 
       async function convertAndDownload() {
@@ -1022,31 +1285,30 @@
             if (state.kind === 'image' && state.imageEl) {
               const w = window.open('', '_blank');
               if (w) {
-                w.document.write(`<img src="${state.blobUrl}" style="max-width:100%;display:block;margin:0 auto;">`);
+                w.document.write(`<!DOCTYPE html><html><head><title>${escapeHtml(name)}</title><style>@page{margin:0}body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh}img{max-width:100%;height:auto}</style></head><body><img src="${state.blobUrl}"></body></html>`);
                 w.document.close();
                 w.focus();
                 w.print();
               } else {
-                window.print();
+                cleanPrint(name);
               }
             } else {
-              showToast('Выберите «Сохранить как PDF» в окне печати');
-              window.print();
+              cleanPrint(name);
             }
             return;
           }
 
           if (state.kind === 'pdf' && target === 'txt') {
-            showToast('Извлечение текста из PDF...');
+            showToast(t('extractingPdf'));
             const text = await extractPdfText();
             state.text = text;
             downloadBlob(new Blob([text], { type: 'text/plain;charset=utf-8' }), `${name}.txt`);
-            showToast('Готово: ' + `${name}.txt`);
+            showToast(t('savedPrefix') + `${name}.txt`);
             return;
           }
 
           if (state.kind === 'pdf' && target === 'png') {
-            showToast('Рендер страниц PDF в PNG...');
+            showToast(t('renderingPng'));
             setProgress(30);
             await loadScript(CDN.pdfjs);
             window.pdfjsLib.GlobalWorkerOptions.workerSrc = CDN.pdfWorker;
@@ -1065,33 +1327,36 @@
               if (blob) downloadBlob(blob, `${name}_page_${i}.png`);
             }
             setProgress(100);
-            showToast(pdf.numPages > 15 ? 'Сохранены первые 15 страниц в PNG' : 'Страницы сохранены в PNG');
+            showToast(pdf.numPages > 15 ? t('savedPngLimit') : t('savedPngAll'));
             return;
           }
 
           if (target === 'html') {
-            const docHtml = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>${escapeHtml(name)}</title><style>body{font-family:system-ui,sans-serif;max-width:820px;margin:40px auto;padding:0 20px;line-height:1.6;color:#111}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}</style></head><body>${state.html}</body></html>`;
+            const cleanBody = state.kind === 'docx'
+              ? state.html
+              : `<div style="max-width:820px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;line-height:1.6;color:#111">${state.html}</div>`;
+            const docHtml = `<!DOCTYPE html><html lang="${state.lang}"><head><meta charset="UTF-8"><title>${escapeHtml(name)}</title><style>body{margin:0;background:#fff;color:#000}table{border-collapse:collapse}th,td{border:1px solid #d1d5db;padding:6px 10px}</style></head><body>${cleanBody}</body></html>`;
             downloadBlob(new Blob([docHtml], { type: 'text/html;charset=utf-8' }), `${name}.html`);
-            showToast('Сохранено: ' + `${name}.html`);
+            showToast(t('savedPrefix') + `${name}.html`);
             return;
           }
 
           if (target === 'txt') {
             downloadBlob(new Blob([state.text || ''], { type: 'text/plain;charset=utf-8' }), `${name}.txt`);
-            showToast('Сохранено: ' + `${name}.txt`);
+            showToast(t('savedPrefix') + `${name}.txt`);
             return;
           }
 
           if (target === 'md') {
             const md = htmlToSimpleMarkdown(state.html);
             downloadBlob(new Blob([md], { type: 'text/markdown;charset=utf-8' }), `${name}.md`);
-            showToast('Сохранено: ' + `${name}.md`);
+            showToast(t('savedPrefix') + `${name}.md`);
             return;
           }
 
           if (target === 'csv') {
             downloadBlob(new Blob([state.text || ''], { type: 'text/csv;charset=utf-8' }), `${name}.csv`);
-            showToast('Сохранено: ' + `${name}.csv`);
+            showToast(t('savedPrefix') + `${name}.csv`);
             return;
           }
 
@@ -1105,7 +1370,7 @@
               jsonText = JSON.stringify(rows, null, 2);
             }
             downloadBlob(new Blob([jsonText], { type: 'application/json;charset=utf-8' }), `${name}.json`);
-            showToast('Сохранено: ' + `${name}.json`);
+            showToast(t('savedPrefix') + `${name}.json`);
             return;
           }
 
@@ -1125,12 +1390,12 @@
             if (blob) {
               const outExt = target === 'jpeg' ? 'jpg' : target;
               downloadBlob(blob, `${name}.${outExt}`);
-              showToast('Сохранено: ' + `${name}.${outExt}`);
+              showToast(t('savedPrefix') + `${name}.${outExt}`);
             }
           }
         } catch (err) {
           setProgress(100);
-          showToast('Ошибка конвертации: ' + (err.message || err));
+          showToast(t('convertError') + (err.message || err));
         }
       }
 
@@ -1138,18 +1403,18 @@
         let txt = state.text;
         if (!txt && state.kind === 'pdf') {
           try {
-            showToast('Извлечение текста из PDF...');
+            showToast(t('extractingPdf'));
             txt = await extractPdfText();
             state.text = txt;
           } catch {
-            showToast('Не удалось извлечь текст');
+            showToast(t('copyFailed'));
             return;
           }
         }
         if (!txt) return;
         try {
           await navigator.clipboard.writeText(txt);
-          showToast('Текст скопирован');
+          showToast(t('copied'));
         } catch {
           const ta = document.createElement('textarea');
           ta.value = txt;
@@ -1157,7 +1422,7 @@
           ta.select();
           document.execCommand('copy');
           ta.remove();
-          showToast('Текст скопирован');
+          showToast(t('copied'));
         }
       }
 
@@ -1166,11 +1431,19 @@
         try { localStorage.setItem('docviewer_theme', isDark ? 'dark' : 'light'); } catch {}
       }
 
+      function toggleLanguage() {
+        state.lang = state.lang === 'uk' ? 'en' : 'uk';
+        try { localStorage.setItem('docviewer_lang', state.lang); } catch {}
+        applyLanguage();
+      }
+
       try {
         if (localStorage.getItem('docviewer_theme') === 'dark') {
           document.documentElement.classList.add('dark');
         }
       } catch {}
+
+      applyLanguage();
 
       // Event Listeners
       el.openBtn.addEventListener('click', () => el.fileInput.click());
@@ -1191,11 +1464,11 @@
       el.convertBtn.addEventListener('click', convertAndDownload);
       el.copyTextBtn.addEventListener('click', copyTextToClipboard);
       el.themeBtn.addEventListener('click', toggleTheme);
+      el.langBtn.addEventListener('click', toggleLanguage);
 
       el.demoBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const sampleMd = `# Пример документа в DocViewer\n\nЭтот файл открыт и отрендерен **полностью локально** в вашем браузере.\n\n## Возможности\n\n- **PDF** — открывается нативным движком браузера без задержек.\n- **DOCX / DOC** — чтение Word-документов без сервера и лимитов.\n- **Конвертация** — выберите нужный формат в верхнем меню и нажмите *Скачать*.\n\n| Формат | Движок | Конвертация |\n| --- | --- | --- |\n| PDF | Нативный браузер / PDF.js | TXT, PNG |\n| DOCX | Mammoth.js | PDF, HTML, TXT, MD |\n| XLSX / CSV | SheetJS | CSV, JSON, HTML, PDF |\n`;
-        const demoFile = new File([sampleMd], 'demo-document.md', { type: 'text/markdown' });
+        const demoFile = new File([t('demoBody')], t('demoFile'), { type: 'text/markdown' });
         openFile(demoFile);
       });
 
