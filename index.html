@@ -640,7 +640,7 @@
     (() => {
       const CDN = {
         jszip: 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.0/jszip.min.js',
-        docxPreview: 'https://cdn.jsdelivr.net/npm/docx-preview@0.3.7/dist/docx-preview.min.js',
+        docxPreview: 'https://cdn.jsdelivr.net/npm/docx-preview@0.4.1/dist/docx-preview.min.js',
         mammoth: 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.13.0/mammoth.browser.min.js',
         pdfjs: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.min.js',
         pdfWorker: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.4.120/legacy/build/pdf.worker.min.js',
@@ -1046,31 +1046,42 @@
 
       function splitOversizedParagraph(pEl, maxH) {
         const text = pEl.textContent || '';
-        if (text.length < 200) return [pEl];
-        // Split only if paragraph has mostly text (no complex nested tables)
-        if (pEl.querySelector('table')) return [pEl];
+        if (text.length < 200 || pEl.querySelector('table')) return [pEl];
+
+        // Preserve original typography from the longest text span inside the paragraph
+        const spans = Array.from(pEl.querySelectorAll('span'));
+        let mainSpanStyle = '';
+        if (spans.length) {
+          const longest = spans.reduce((a, b) => (b.textContent.length > a.textContent.length ? b : a), spans[0]);
+          const lcs = getComputedStyle(longest);
+          mainSpanStyle = `font-family:${lcs.fontFamily};font-size:${lcs.fontSize};color:${lcs.color};line-height:${lcs.lineHeight};`;
+        }
 
         const imgs = Array.from(pEl.querySelectorAll('img')).map(img => img.cloneNode(true));
         const words = text.split(/(\s+)/);
         const chunks = [];
         const probe = pEl.cloneNode(false);
-        probe.style.visibility = 'hidden';
-        probe.style.position = 'absolute';
-        probe.style.width = pEl.getBoundingClientRect().width + 'px';
+        probe.style.cssText += ';visibility:hidden;position:absolute;left:-9999px;width:' + pEl.getBoundingClientRect().width + 'px;' + mainSpanStyle;
         pEl.parentNode.insertBefore(probe, pEl);
 
-        let cur = '';
-        for (let i = 0; i < words.length; i++) {
-          const next = cur + words[i];
-          probe.textContent = next;
-          if (cur && probe.getBoundingClientRect().height > maxH) {
-            chunks.push(cur.trim());
-            cur = words[i].trimStart();
-          } else {
-            cur = next;
+        // Binary-search-like fast chunking by word batches
+        let start = 0;
+        while (start < words.length) {
+          let lo = start + 1, hi = words.length, best = start + 1;
+          while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            probe.textContent = words.slice(start, mid).join('');
+            if (probe.getBoundingClientRect().height <= maxH) {
+              best = mid;
+              lo = mid + 1;
+            } else {
+              hi = mid - 1;
+            }
           }
+          const part = words.slice(start, best).join('').trim();
+          if (part) chunks.push(part);
+          start = best;
         }
-        if (cur.trim()) chunks.push(cur.trim());
         probe.remove();
 
         if (chunks.length <= 1) return [pEl];
@@ -1079,7 +1090,10 @@
           if (idx === 0 && imgs.length) {
             imgs.forEach(im => clone.appendChild(im));
           }
-          clone.appendChild(document.createTextNode(chunk));
+          const span = document.createElement('span');
+          if (mainSpanStyle) span.style.cssText = mainSpanStyle;
+          span.textContent = chunk;
+          clone.appendChild(span);
           return clone;
         });
       }
